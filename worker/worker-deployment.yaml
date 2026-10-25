@@ -1,0 +1,37 @@
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sentiment-worker
+  namespace: default
+spec:
+  replicas: 0
+  selector:
+    matchLabels:
+      app: sentiment-worker
+  template:
+    metadata:
+      labels:
+        app: sentiment-worker
+    spec:
+      containers:
+        - name: sentiment-worker
+          image: alaai/sentiment-worker:v1
+          imagePullPolicy: Always
+          env:
+            - name: RABBITMQ_HOST
+              value: rabbitmq
+            - name: RABBITMQ_USER
+              value: sentiment
+            - name: RABBITMQ_PASSWORD
+              value: "SentimentPass123!"
+            - name: QUEUE_NAME
+              value: sentiment-queue
+          resources:
+            requests:
+              cpu: 300m
+              memory: 768Mi
+            limits:
+              cpu: "1"
+              memory: 2Gi
+

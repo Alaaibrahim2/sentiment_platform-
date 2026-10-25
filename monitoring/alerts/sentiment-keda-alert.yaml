@@ -1,0 +1,21 @@
+
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: sentiment-keda-alert
+  namespace: monitoring
+  labels:
+    release: prometheus
+spec:
+  groups:
+    - name: sentiment-keda.rules
+      rules:
+        - alert: SentimentQueueRateHigh
+          expr: sum(rate(sentiment_requests_enqueued_total[1m])) > 0.311
+          for: 1m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Sentiment message rate exceeded threshold"
+            description: "The enqueue rate has exceeded 0.311 messages per second for 1 minute."
+

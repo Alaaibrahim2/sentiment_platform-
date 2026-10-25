@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sentiment-producer
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sentiment-producer
+  template:
+    metadata:
+      labels:
+        app: sentiment-producer
+    spec:
+      containers:
+        - name: producer
+          image: alaai/sentiment-producer:v1
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 8000
+          env:
+            - name: RABBITMQ_HOST
+              value: rabbitmq
+            - name: RABBITMQ_USER
+              value: sentiment
+            - name: RABBITMQ_PASSWORD
+              value: "SentimentPass123!"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sentiment-producer
+  namespace: default
+spec:
+  type: NodePort
+  selector:
+    app: sentiment-producer
+  ports:
+    - name: http
+      port: 8000
+      targetPort: 8000
+      nodePort: 30800

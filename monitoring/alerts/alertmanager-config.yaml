@@ -1,0 +1,27 @@
+apiVersion: monitoring.coreos.com/v1alpha1
+kind: AlertmanagerConfig
+metadata:
+  name: sentiment-gmail
+  namespace: monitoring
+spec:
+  route:
+    receiver: gmail-receiver
+    groupBy: ['alertname']
+    groupWait: 30s
+    groupInterval: 5m
+    repeatInterval: 30m
+    matchers:
+      - name: alertname
+        value: SentimentQueueRateHigh
+  receivers:
+    - name: gmail-receiver
+      emailConfigs:
+        - to: 'oe911023@gmail.com'
+          from: 'oe911023@gmail.com'
+          smarthost: 'smtp.gmail.com:587'
+          authUsername: 'oe911023@gmail.com'
+          authPassword:
+            name: alertmanager-gmail
+            key: password
+          requireTLS: true
+          sendResolved: true

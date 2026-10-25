@@ -1,0 +1,22 @@
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: sentiment-worker-scaler
+  namespace: default
+spec:
+  scaleTargetRef:
+    name: sentiment-worker
+
+  pollingInterval: 15
+  cooldownPeriod: 60
+  minReplicaCount: 0
+  maxReplicaCount: 5
+
+  triggers:
+    - type: prometheus
+      metadata:
+        serverAddress: http://prometheus-kube-prometheus-prometheus.monitoring.svc.cluster.local:9090
+        metricName: sentiment_requests_enqueued_rate
+        query: sum(rate(sentiment_requests_enqueued_total[1m]))
+        threshold: "0.05"
+        activationThreshold: "0"
